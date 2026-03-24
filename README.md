@@ -8,8 +8,8 @@ Official Implementation of the paper "[Becoming Experienced Judges: Selective Te
 |--------|-------------|--------|
 | **Vanilla** | Fixed evaluation prompt. | `methods/vanilla.py` |
 | **Sample-Specific Prompt (SSP)** | Static meta-prompt for all samples. Per-sample generated rubric, then judge. | `methods/ssp.py` |
-| **LWE** | Evolving meta-prompt and per-sample generated rubric. | `methods/lwe.py` |
-| **Selective LWE** | Vanilla consistency check first -> LWE pipeline only on inconsistent samples. | `methods/selective_lwe.py` |
+| 🌟 **LWE** | Evolving meta-prompt and per-sample generated rubric. | `methods/lwe.py` |
+| 🌟🌟 **Selective LWE** | Vanilla consistency check first -> LWE pipeline only on inconsistent samples. | `methods/selective_lwe.py` |
 
 Prompts are in the `prompts/` directory.
 
@@ -32,7 +32,9 @@ export ANTHROPIC_API_KEY=...    # for Claude models
 
 
 
-## Data
+## Data Preparation
+<details>
+<summary>Click to expand</summary>
 
 ### Download [VL-RewardBench](https://huggingface.co/datasets/MMInstruction/VL-RewardBench)
 
@@ -79,6 +81,8 @@ You can run with your own custom data by providing a JSONL file with the above f
 
 Simply point `dataset.data_path` in your config YAML to your custom JSONL file.
 
+</details>
+
 
 
 ## Run
@@ -98,18 +102,12 @@ python judge.py --config configs/gpt_selective_lwe_vl.yaml
 ### Gemini
 
 ```bash
-python judge.py --config configs/gemini_vanilla.yaml
-python judge.py --config configs/gemini_ssp.yaml
-python judge.py --config configs/gemini_lwe.yaml
 python judge.py --config configs/gemini_selective_lwe.yaml
 ```
 
 ### Claude
 
 ```bash
-python judge.py --config configs/claude_vanilla.yaml
-python judge.py --config configs/claude_ssp.yaml
-python judge.py --config configs/claude_lwe.yaml
 python judge.py --config configs/claude_selective_lwe.yaml
 ```
 
@@ -138,7 +136,9 @@ Per-sample fields include `pred`, `acc`, `swap_pred`, `swap_acc`, `consistency`,
 
 
 
-## Layout
+## Code Structure
+<details>
+<summary>Click to expand</summary>
 
 ```
 lwe/
@@ -168,6 +168,8 @@ lwe/
     utils.py
   requirements.txt
 ```
+
+</details>
 
 ## Citation
 
