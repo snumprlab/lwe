@@ -188,3 +188,11 @@ If you find this work useful, please cite:
   pages = {697--721}
 }
 ```
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+All datasets and codebases are used strictly for non-commercial academic research
+in compliance with their respective licenses. Users of this repository are responsible
+for ensuring compliance with the original dataset licenses.
