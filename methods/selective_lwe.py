@@ -71,11 +71,12 @@ def _lwe_one(
     meta_prompt: str,
     model,
     temperature: float,
+    eval_requirements: str | None = None,
 ) -> Dict[str, Any]:
     """Run LWE pipeline (rubric → judge → meta-eval) for one inconsistent sample."""
     gen_in = sh.prompt_for_eval_generation(meta_prompt, sample)
     rubric = model.generate(gen_in, sample.get("Image"), temperature=temperature)
-    eval_prompt = sh.assemble_eval_prompt(rubric, sample)
+    eval_prompt = sh.assemble_eval_prompt(rubric, sample, eval_requirements=eval_requirements)
     judgment = model.generate(eval_prompt, sample.get("Image"), temperature=temperature)
 
     meta_eval_input = sh.meta_eval_prompt(meta_prompt, eval_prompt, judgment)
@@ -151,13 +152,14 @@ def run_dataset(model, dataloader, cfg: Dict[str, Any]) -> None:
     vanilla_prompt_tmpl = (
         cfg.get("prompts", {}).get("vanilla_judge_prompt") or VANILLA_JUDGE_PROMPT
     )
+    eval_requirements = cfg.get("prompts", {}).get("eval_requirements")
     extract_fn = return_extract_judgment_fn(ds_name)
     temperature = float(cfg.get("temperature", 0.0))
     restrict_length = bool(lwe_cfg.get("restrict_length", False))
     max_meta_len = int(lwe_cfg.get("max_meta_prompt_length", 10000))
     lwe_batch_size = int(lwe_cfg.get("lwe_batch_size", 4))
 
-    cumulative = {"acc": [], "swap_acc": [], "consistency": [], "pair_acc": []}
+    cumulative: Dict[str, List[float]] = {"acc": [], "swap_acc": [], "consistency": [], "pair_acc": []}
     all_results: List[Dict[str, Any]] = []
     lwe_buffer: List[Dict[str, Any]] = []  # accumulates inconsistent samples across dataloader batches
     batch_idx = 0
@@ -214,6 +216,7 @@ def run_dataset(model, dataloader, cfg: Dict[str, Any]) -> None:
                 meta_prompt=meta_prompt,
                 model=model,
                 temperature=temperature,
+                eval_requirements=eval_requirements,
             )
             with ThreadPool(len(inconsistent)) as pool:
                 lwe_results = list(pool.imap(lwe_worker, inconsistent))
