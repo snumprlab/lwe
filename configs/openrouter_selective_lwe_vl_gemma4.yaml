@@ -1,4 +1,4 @@
-# Selective LWE on MM-RewardBench via OpenRouter (Gemma 4 26B)
+# Selective LWE on VL-RewardBench via OpenRouter (Gemma 4 26B)
 
 seed: 123
 method: selective_lwe
@@ -18,8 +18,8 @@ model:
   max_try: 3
 
 dataset:
-  name: mmrewardbench
-  data_path: data/mmrewardbench/mmrewardbench_test.jsonl
+  name: vlrewardbench
+  data_path: data/vlrewardbench/vlrewardbench_test.jsonl
   image_prefix: ""
   order_ids_path: null
   strict_order: false
