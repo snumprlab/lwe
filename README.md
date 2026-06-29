@@ -1,6 +1,6 @@
 # Becoming Experienced Judges: Selective Test-Time Learning for Evaluators (EACL 2026)
 
-Official Implementation of the paper "[Becoming Experienced Judges: Selective Test-Time Learning for Evaluators](https://aclanthology.org/2026.eacl-short.50/)" (EACL 2026 [Short-Oral], ACL 2026 Workshop on Evaluating Evaluations (EvalEval)).
+Official Implementation of the paper "[Becoming Experienced Judges: Selective Test-Time Learning for Evaluators](https://aclanthology.org/2026.eacl-short.50/)" ([EACL 2026](https://2026.eacl.org/) [Short-**Oral**], ACL 2026 Workshop on Evaluating Evaluations (EvalEval) [**Oral**]).
 
 
 
