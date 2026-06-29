@@ -27,13 +27,18 @@ def prompt_for_eval_generation(meta_text: str, sample: Dict[str, Any]) -> str:
     )
 
 
-def assemble_eval_prompt(generated_rubric: str, sample: Dict[str, Any]) -> str:
+def assemble_eval_prompt(
+    generated_rubric: str,
+    sample: Dict[str, Any],
+    eval_requirements: str | None = None,
+) -> str:
+    reqs = (eval_requirements or LP.STATIC_REQUIREMENTS_FOR_EVAL_PROMPT).strip()
     return (
         generated_rubric.strip()
         + "\n\n"
         + example_block(sample)
         + "\n\n"
-        + LP.STATIC_REQUIREMENTS_FOR_EVAL_PROMPT.strip()
+        + reqs
     )
 
 
