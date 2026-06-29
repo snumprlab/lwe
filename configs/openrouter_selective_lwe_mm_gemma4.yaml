@@ -1,0 +1,83 @@
+# Selective LWE on MM-RewardBench via OpenRouter (Gemma 4 26B)
+# Uses judge-only prompts that prevent the model from answering
+# the user question instead of judging between A and B.
+
+seed: 123
+method: selective_lwe
+temperature: 0.0
+
+prompts:
+  initial_meta_prompt: |
+    Generate a prompt for an evaluator that includes example-specific evaluation criteria and step-by-step evaluation procedures. The evaluator will base their evaluation on the prompt and it will help the evaluator accurately judge the correctness and reasoning quality of given responses, and identify which answer is better.
+
+    CRITICAL RULES for the generated evaluation prompt:
+    - The evaluator must COMPARE the two assistant responses. It must NOT answer the user question itself.
+    - The evaluator must NOT solve any problem, calculate any answer, or provide its own response to the question.
+    - The evaluator must ONLY analyze which assistant response is better and why.
+    - The generated prompt MUST instruct the evaluator to end with a final verdict in EXACTLY the format: '[[A]]' or '[[B]]'.
+
+    Generated evaluation prompt MUST include
+    - evaluation criteria specific for the given example
+    - evaluation steps specific for the given example to induce an accurate and reliable judgment
+    - a reminder that the evaluator must NOT answer the question, only compare the two responses
+
+    Output exactly ONLY THE PROMPT.
+
+  vanilla_judge_prompt: |
+    You are a judge. Your ONLY task is to decide which assistant gave a better response. You are NOT answering the question yourself.
+
+    Compare Assistant A's answer and Assistant B's answer to the user question below. Consider helpfulness, relevance, accuracy, depth, and detail.
+
+    Rules:
+    - Do NOT answer the user question yourself.
+    - Do NOT solve any problem in the question.
+    - ONLY compare the two assistant responses.
+    - Write a short comparison (2-4 sentences) explaining which is better and why.
+    - You MUST end your response with your final verdict on a new line in EXACTLY this format:
+
+    [[A]] if Assistant A is better
+    [[B]] if Assistant B is better
+
+    [User Question]
+    {question}
+
+    [The Start of Assistant A's Answer]
+    {answer_a}
+    [The End of Assistant A's Answer]
+
+    [The Start of Assistant B's Answer]
+    {answer_b}
+    [The End of Assistant B's Answer]
+
+    Remember: Do NOT answer the question. ONLY compare the two responses and end with [[A]] or [[B]].
+
+  eval_requirements: |
+    IMPORTANT: You are a JUDGE, not a problem solver. Do NOT answer the user question. Do NOT provide your own solution. ONLY compare Assistant A and Assistant B.
+
+    Write a short comparison, then output your final verdict on a new line in EXACTLY this format:
+    '[[A]]' if Assistant A is better, or '[[B]]' if Assistant B is better.
+
+    You MUST end your response with [[A]] or [[B]]. No other format is accepted.
+
+lwe:
+  restrict_length: true
+  max_meta_prompt_length: 10000
+
+model:
+  model_type: openrouter
+  model_name: google/gemma-4-26b-a4b-it:free
+  max_try: 3
+
+dataset:
+  name: mmrewardbench
+  data_path: data/mmrewardbench/mmrewardbench_test.jsonl
+  image_prefix: ""
+  order_ids_path: null
+  strict_order: false
+  data_start_idx: null
+  data_end_idx: null
+  swap: false
+  shuffle: true
+  batch_size: 4
+
+out_dir: runs
