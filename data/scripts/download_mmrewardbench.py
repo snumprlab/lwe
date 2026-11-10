@@ -42,7 +42,8 @@ def parse_args():
         type=str,
         default=None,
         help="Path to a JSON list of IDs (e.g. data/scripts/mmrewardbench_paper_ids.json). "
-             "When set, filters to exactly those IDs in that order, ignoring --sample_size/--seed.",
+             "Exports those IDs in order, ignoring --sample_size/--seed. "
+             "If any requested ID is missing, exits with an error before writing the JSONL.",
     )
     parser.add_argument(
         "--sample_size",
@@ -109,8 +110,11 @@ def main():
         id_to_row = {sample["ID"]: (idx, sample) for idx, sample in rows_raw}
         missing = [i for i in paper_ids if i not in id_to_row]
         if missing:
-            print(f"  WARNING: {len(missing)} paper IDs not found in dataset: {missing[:5]}")
-        rows_raw = [id_to_row[i] for i in paper_ids if i in id_to_row]
+            raise SystemExit(
+                f"Cannot reproduce the exact paper subset: {len(missing)} requested ID(s) "
+                f"missing from the dataset. Missing ID sample (up to 5): {missing[:5]}"
+            )
+        rows_raw = [id_to_row[i] for i in paper_ids]
         print(f"  Filtered to {len(rows_raw)} examples matching paper IDs")
     elif not args.no_subsample and args.sample_size > 0:
         if len(rows_raw) > args.sample_size:
