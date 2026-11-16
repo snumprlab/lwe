@@ -65,6 +65,9 @@ python data/scripts/download_mmrewardbench.py --no_subsample
 python data/scripts/download_mmrewardbench.py --sample_size 500
 ```
 
+`--paper_ids` requires every requested ID to be present in the selected split.
+If any ID is missing, the script exits with an error before writing the JSONL.
+
 ### Data format
 
 Each row in the JSONL must contain:
