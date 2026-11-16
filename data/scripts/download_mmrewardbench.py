@@ -1,24 +1,8 @@
 import argparse
 import json
 import random
+from collections import Counter
 from pathlib import Path
-
-
-# IDs that appear more than once in the dataset — suffixed with _1 / _2 to deduplicate.
-_DUPLICATE_IDS = {
-    "mathvista_117",
-    "mathvista_241",
-    "mathvista_313",
-    "mathvista_498",
-    "mathvista_629",
-    "mathvista_751",
-    "mathvista_963",
-    "mathvista_974",
-    "visitbench_286",
-    "visitbench_312",
-    "visitbench_544",
-    "visitbench_61",
-}
 
 
 def parse_args():
@@ -64,6 +48,24 @@ def parse_args():
     return parser.parse_args()
 
 
+def disambiguate_duplicate_ids(rows_raw):
+    """Rename duplicate IDs to {ID}-0, {ID}-1, ... by occurrence order.
+    """
+    counts = Counter(sample["ID"] for _, sample in rows_raw)
+    seen: Counter = Counter()
+    out = []
+    n_rewritten = 0
+    for idx, sample in rows_raw:
+        sample_id = sample["ID"]
+        if counts[sample_id] > 1:
+            sample = dict(sample)
+            sample["ID"] = f"{sample_id}-{seen[sample_id]}"
+            seen[sample_id] += 1
+            n_rewritten += 1
+        out.append((idx, sample))
+    return out, n_rewritten
+
+
 def save_image(img, image_dir: Path, sample_id: str, idx: int) -> str:
     """Save a PIL image and return the absolute path string."""
     import numpy as np
@@ -102,6 +104,9 @@ def main():
     print(f"  {len(dataset)} total examples")
 
     rows_raw = list(enumerate(tqdm(dataset, desc="Loading")))
+    rows_raw, n_rewritten = disambiguate_duplicate_ids(rows_raw)
+    if n_rewritten:
+        print(f"  Disambiguated {n_rewritten} duplicate-ID rows as ID-0 / ID-1")
 
     # Filter / subsample
     if args.paper_ids is not None:
@@ -120,14 +125,8 @@ def main():
 
     # Convert and save images
     rows = []
-    dup_counter: dict = {}
     for idx, sample in tqdm(rows_raw, desc="Saving images"):
         sample_id = sample["ID"]
-
-        # Handle duplicate IDs by appending _1 / _2
-        if sample_id in _DUPLICATE_IDS:
-            dup_counter[sample_id] = dup_counter.get(sample_id, 0) + 1
-            sample_id = f"{sample_id}_{dup_counter[sample_id]}"
 
         image_path = None
         if sample.get("Image") is not None:
@@ -153,8 +152,6 @@ def main():
 
     print(f"\nDone. Saved {len(rows)} rows → {out_path}")
     print(f"Images saved under: {image_dir}")
-    if dup_counter:
-        print(f"Deduplicated IDs: {list(dup_counter.keys())}")
 
 
 if __name__ == "__main__":
